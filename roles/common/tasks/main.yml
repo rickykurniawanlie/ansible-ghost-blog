@@ -1,0 +1,14 @@
+---
+- name: Install NGINX
+  apt: name=nginx update_cache=yes cache_valid_time=3600
+
+- name: Copy nginx config file
+  copy: src=files/nginx.conf dest=/etc/nginx/sites-available/default
+  notify: restart nginx
+
+- name: Enable configuration
+  file: >
+    dest=/etc/nginx/sites-enabled/default
+    src=/etc/nginx/sites-available/default
+    state=link
+  notify: restart nginx

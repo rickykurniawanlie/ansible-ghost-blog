@@ -1,0 +1,20 @@
+server {
+  listen 80;
+  listen [::]:80;
+
+  server_name {{ nginx_server_name }};
+
+  location / {
+    proxy_pass http://localhost:{{ docker_external_port }};
+  }
+
+  listen 443 ssl;
+  ssl_certificate /etc/letsencrypt/live/{{ nginx_server_name }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ nginx_server_name }}/privkey.pem;
+  include /etc/letsencrypt/options-ssl-nginx.conf;
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+  if ($scheme != "https") {
+      return 301 https://$host$request_uri;
+  }
+}

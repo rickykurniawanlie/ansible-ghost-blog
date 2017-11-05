@@ -1,0 +1,27 @@
+---
+- hosts: blog_servers
+  vars:
+    # geerlingguy.pip
+    pip_install_packages:
+      - name: docker
+
+    # geerlingguy.certbot
+    certbot_install_from_source: no
+    certbot_repo: https://github.com/certbot/certbot.git
+    certbot_version: master
+    certbot_keep_updated: yes
+    certbot_auto_renew: true
+    certbot_auto_renew_user: "root"
+    certbot_auto_renew_hour: 3
+    certbot_auto_renew_minute: 30
+    certbot_auto_renew_options: "--quiet --no-self-upgrade"
+    certbot_dir: /opt/certbot
+
+  vars_files:
+    - group_vars/letsencrypt_email.yml
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker
+    - geerlingguy.certbot
+    - common
+    - blog

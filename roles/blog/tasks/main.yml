@@ -1,0 +1,49 @@
+---
+- name: Create docker volume {{ docker_volume_name }}
+  docker_volume:
+    name: "{{ docker_volume_name }}"
+    state: present
+
+- name: Create docker network {{ docker_network_name }}
+  docker_network:
+    name: "{{ docker_network_name }}"
+    state: present
+    appends: no
+
+- name: Run Ghost Image
+  docker_container:
+    name: ghost
+    image: ghost:1-alpine
+    ports:
+      - "{{ docker_external_port }}:2368"
+    volumes:
+      - "{{ docker_volume_name }}:/var/lib/ghost/content"
+    networks:
+      - name: "{{ docker_network_name }}"
+    env:
+      NODE_ENV: "{{ ghost_env }}"
+      url: "{{ ghost_url }}"
+
+- name: Create/update TLS certificate
+  command: /opt/certbot/certbot-auto certonly \
+    --nginx \
+    --email {{ letsencrypt_email }} \
+    --domain {{ nginx_server_name }} \
+    --cert-name {{ nginx_server_name }} \
+    --redirect \
+    --agree-tos \
+    --keep-until-expiring \
+    -n
+
+- name: Copy nginx.conf to sites-enabled
+  template: >
+    src=nginx.conf.j2
+    dest=/etc/nginx/sites-available/{{ nginx_server_name }}
+  notify: restart nginx
+
+- name: Enable blog by linking config to sites-enabled
+  file: >
+    dest=/etc/nginx/sites-enabled/{{ nginx_server_name }}
+    src=/etc/nginx/sites-available/{{ nginx_server_name }}
+    state=link
+  notify: restart nginx

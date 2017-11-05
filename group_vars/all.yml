@@ -1,0 +1,13 @@
+---
+# Ghost related
+ghost_env: production
+ghost_url: http://blog.rickyk.me
+
+# Docker related
+docker_external_port: 20080
+docker_network_name: rickyk-net
+docker_volume_name: ghost-blog
+#docker_volume_name: blog-vol
+
+# Nginx config
+nginx_server_name: blog.rickyk.me
